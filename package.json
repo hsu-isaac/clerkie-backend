@@ -4,11 +4,14 @@
   "description": "",
   "main": "incorrect.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "Sebastian Wigstroem",
   "license": "ISC",
   "dependencies": {
-    "mongoose": "^5.9.20"
+    "mongoose": "^5.13.23"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
