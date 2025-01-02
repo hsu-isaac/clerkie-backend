@@ -4,7 +4,7 @@
   "description": "",
   "main": "incorrect.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "author": "Sebastian Wigstroem",
   "license": "ISC",

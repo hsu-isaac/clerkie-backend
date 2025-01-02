@@ -9,6 +9,7 @@
  */
 
 const models = require("./models");
+const mongoose = require("mongoose");
 
 /*
  * Loops through the userIds and pulls the first user that can be found in the database.
@@ -23,10 +24,8 @@ async function pullFirstUser(userIds) {
       userIds.indexOf(a._id.toString()) - userIds.indexOf(b._id.toString())
   );
 
-  console.log(sortedUsers);
-
   if (sortedUsers.length === 0) {
-    return null;
+    return;
   }
   return sortedUsers[0];
 }
@@ -43,13 +42,21 @@ module.exports.pullFirstUser = pullFirstUser;
  *
  * The users argument is an array of user objects (with _id fields)
  */
-function pullPaymentsForUsers(users) {
+async function pullPaymentsForUsers(users) {
   let result = [];
-  for (let user of users) {
-    models.payment.findOne({ user_id: user._id }).then((payments) => {
-      result.push(payments);
-    });
-  }
+
+  const payments = await models.payment.find({
+    user: {
+      $in: users.map((user) => mongoose.Types.ObjectId(user._id)),
+    },
+  });
+
+  result = users.map((user) => {
+    return payments.filter(
+      (payment) => payment.user.toString() === user._id.toString()
+    );
+  });
+
   return result; // array of array with payments (the first array should contain payments for the first user)
 }
 module.exports.pullPaymentsForUsers = pullPaymentsForUsers;
@@ -59,7 +66,10 @@ module.exports.pullPaymentsForUsers = pullPaymentsForUsers;
  * something other than a number is passed to the function)
  */
 function convertToStr(num) {
-  if (!num) return num.toString();
+  if (typeof num !== "number" || isNaN(num)) {
+    return;
+  }
+  return num.toString();
 }
 module.exports.convertToStr = convertToStr;
 
@@ -70,9 +80,16 @@ module.exports.convertToStr = convertToStr;
  *
  * Sometimes the payment id might not match any payments.
  */
-function getPaymentWithUser(paymentId) {
-  let payment = models.payment.find({ _id: paymentId });
-  payment.user = models.user.find({ _id: payment.user });
+async function getPaymentWithUser(paymentId) {
+  let payment = await models.payment
+    .findById(paymentId)
+    .populate("user")
+    .exec();
+
+  if (!payment) {
+    return null;
+  }
+
   return payment;
 }
 module.exports.getPaymentWithUser = getPaymentWithUser;
@@ -82,13 +99,20 @@ module.exports.getPaymentWithUser = getPaymentWithUser;
  * mapping the user id to the user's payments (string to array).
  * Note: userIds is passed in as an array of strings
  */
-function getGroupedUserPmts(userIds) {
-  let result = {};
-  let payments = models.payment.find({ user_id: userIds });
-  userIds.forEach((userId) => {
-    payments = payments.filter((payment) => userIds.includes(payment.user_id));
-    result[userId] = payments;
+async function getGroupedUserPmts(userIds) {
+  const payments = await models.payment.find({
+    user: { $in: userIds },
+    active: true,
   });
+
+  const result = {};
+
+  for (const userId of userIds) {
+    result[userId] = payments.filter(
+      (payment) => payment.user.toString() === userId
+    );
+  }
+
   return result;
 }
 module.exports.getGroupedUserPmts = getGroupedUserPmts;
