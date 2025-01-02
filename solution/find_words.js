@@ -36,20 +36,6 @@ class Trie {
     }
     node.isEndOfWord = true;
   }
-
-  searchPrefix(prefix) {
-    let node = this.root;
-    for (const char of prefix) {
-      if (!node.children[char]) return null;
-      node = node.children[char];
-    }
-    return node;
-  }
-
-  contains(word) {
-    const node = this.searchPrefix(word);
-    return node !== null && node.isEndOfWord;
-  }
 }
 
 /**
