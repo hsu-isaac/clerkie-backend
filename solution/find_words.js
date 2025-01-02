@@ -81,14 +81,14 @@ function findWords(wordGrid, dictionary) {
   const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
 
   const directions = [
-    [-1, 0],
-    [1, 0],
-    [0, -1],
-    [0, 1],
-    [-1, -1],
-    [-1, 1],
-    [1, -1],
-    [1, 1],
+    [-1, 0], // Up
+    [1, 0], // Down
+    [0, -1], // Left
+    [0, 1], // Right
+    [-1, -1], // Up+Left
+    [-1, 1], // Up+Right
+    [1, -1], // Down+Left
+    [1, 1], // Down+Right
   ];
 
   function dfs(row, col, node, word, dir) {
