@@ -91,10 +91,7 @@ module.exports.convertToStr = convertToStr;
  * Sometimes the payment id might not match any payments.
  */
 async function getPaymentWithUser(paymentId) {
-  let payment = await models.payment
-    .findById(paymentId)
-    .populate("user")
-    .exec();
+  let payment = await models.payment.findById(paymentId).populate("user");
 
   if (!payment) {
     return null;
