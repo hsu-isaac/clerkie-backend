@@ -19,15 +19,17 @@ const mongoose = require("mongoose");
 async function pullFirstUser(userIds) {
   const users = await models.user.find({ _id: { $in: userIds } });
 
-  const sortedUsers = users.sort(
-    (a, b) =>
-      userIds.indexOf(a._id.toString()) - userIds.indexOf(b._id.toString())
-  );
-
-  if (sortedUsers.length === 0) {
-    return;
+  const userMap = {};
+  for (const user of users) {
+    userMap[user._id.toString()] = user;
   }
-  return sortedUsers[0];
+
+  for (let userId of userIds) {
+    if (userMap[userId]) {
+      return userMap[userId];
+    }
+  }
+  return;
 }
 module.exports.pullFirstUser = pullFirstUser;
 
@@ -51,11 +53,19 @@ async function pullPaymentsForUsers(users) {
     },
   });
 
-  result = users.map((user) => {
-    return payments.filter(
-      (payment) => payment.user.toString() === user._id.toString()
-    );
-  });
+  const paymentMap = {};
+  for (const payment of payments) {
+    const userId = payment.user.toString();
+    if (!paymentMap[userId]) {
+      paymentMap[userId] = [];
+    }
+    paymentMap[userId].push(payment);
+  }
+
+  for (const user of users) {
+    const userId = user._id.toString();
+    result.push(paymentMap[userId] || []);
+  }
 
   return result; // array of array with payments (the first array should contain payments for the first user)
 }
