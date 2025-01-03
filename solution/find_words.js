@@ -39,84 +39,136 @@ class Trie {
 }
 
 /**
+ * Helper function to validate the input values for wordGrid and dictionary
+ * @param {Array} wordGrid Letter grid as an array of arrays of strings
+ * @param {Set} dictionary Set containing words to search for
+ * @returns {Set} The dictionary as a Set, ensuring all entries are valid
+ * @throws {TypeError} If any input is invalid
+ */
+const validateInputs = (wordGrid, dictionary) => {
+  if (
+    !Array.isArray(wordGrid) ||
+    !wordGrid.every((row) => Array.isArray(row))
+  ) {
+    throw new TypeError("wordGrid must be an array of arrays.");
+  }
+
+  if (
+    !wordGrid.every((row) =>
+      row.every((char) => typeof char === "string" && char.length === 1)
+    )
+  ) {
+    throw new TypeError("wordGrid must contain only single-character strings.");
+  }
+
+  if (!(dictionary instanceof Set)) {
+    throw new TypeError("dictionary must be a Set.");
+  }
+
+  return dictionary;
+};
+
+/**
+ * Helper function to check if a given coordinate is within the grid bounds.
+ * @param {number} row The row index of the grid.
+ * @param {number} col The column index of the grid.
+ * @param {number} numberOfRows Total number of rows in the grid.
+ * @param {number} numberOfColumns Total number of columns in the grid.
+ * @returns {boolean} Returns true if the coordinates are within bounds; false otherwise.
+ */
+const isValidCoord = (row, col, numberOfRows, numberOfColumns) => {
+  return row >= 0 && col >= 0 && row < numberOfRows && col < numberOfColumns;
+};
+
+/**
  * Finds all words from the dictionary that are present in the grid of letters
  * @param {Array} wordGrid Letter grid represented as an array of char arrays.
  * The first array from the above example would be passed in
  * as ["C", "C", "C"] and the second would be ["C", "A", "C"], etc...)
  * @param {Set} dictionary Contains all words to look for in the letter grid
  * @returns {Set} All words from the dictionary that were found
+ * @throws {Error} If an error is encountered
  */
 function findWords(wordGrid, dictionary) {
-  if (
-    !wordGrid ||
-    !dictionary ||
-    wordGrid.length === 0 ||
-    dictionary.size === 0
-  ) {
-    return new Set();
+  try {
+    dictionary = validateInputs(wordGrid, dictionary);
+  } catch (error) {
+    throw new Error(`Invalid input: ${error.message}`);
   }
 
-  const trie = new Trie();
-  for (const word of dictionary) {
-    trie.insert(word);
-  }
-
-  const rows = wordGrid.length;
-  const cols = wordGrid[0].length;
-  const foundWords = new Set();
-  const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-
-  const directions = [
-    [-1, 0], // Up
-    [1, 0], // Down
-    [0, -1], // Left
-    [0, 1], // Right
-    [-1, -1], // Up+Left
-    [-1, 1], // Up+Right
-    [1, -1], // Down+Left
-    [1, 1], // Down+Right
-  ];
-
-  function dfs(row, col, node, word, dir) {
-    if (row < 0 || col < 0 || row >= rows || col >= cols || visited[row][col]) {
-      return;
+  try {
+    if (wordGrid.length === 0 || dictionary.size === 0) {
+      return new Set();
     }
 
-    const char = wordGrid[row][col];
-    if (!node.children[char]) {
-      return;
+    const numberOfRows = wordGrid.length;
+    const numberOfColumns = wordGrid[0].length;
+    const foundWords = new Set();
+    const visited = Array.from({ length: numberOfRows }, () =>
+      Array(numberOfColumns).fill(false)
+    );
+    const trie = new Trie();
+    const directions = [
+      [-1, 0], // Up
+      [1, 0], // Down
+      [0, -1], // Left
+      [0, 1], // Right
+      [-1, -1], // Up+Left
+      [-1, 1], // Up+Right
+      [1, -1], // Down+Left
+      [1, 1], // Down+Right
+    ];
+
+    for (const word of dictionary) {
+      trie.insert(word);
     }
 
-    visited[row][col] = true;
-    word += char;
-    node = node.children[char];
-
-    if (node.isEndOfWord) {
-      foundWords.add(word);
-    }
-
-    if (dir === null) {
-      for (const [dx, dy] of directions) {
-        dfs(row + dx, col + dy, node, word, [dx, dy]);
+    function directionalDfs(row, col, node, word, direction) {
+      if (
+        !isValidCoord(row, col, numberOfRows, numberOfColumns) ||
+        visited[row][col]
+      ) {
+        return;
       }
-    } else {
-      const [dx, dy] = dir;
-      dfs(row + dx, col + dy, node, word, dir);
-    }
 
-    visited[row][col] = false;
-  }
-
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
       const char = wordGrid[row][col];
-      if (trie.root.children[char]) {
-        dfs(row, col, trie.root, "", null);
+      if (!node.children[char]) {
+        return;
+      }
+
+      visited[row][col] = true;
+      word += char;
+      node = node.children[char];
+
+      if (node.isEndOfWord) {
+        foundWords.add(word);
+      }
+
+      if (direction === null) {
+        for (const [dx, dy] of directions) {
+          directionalDfs(row + dx, col + dy, node, word, [dx, dy]);
+        }
+      } else {
+        const [dx, dy] = direction;
+        directionalDfs(row + dx, col + dy, node, word, direction);
+      }
+
+      visited[row][col] = false;
+    }
+
+    for (let row = 0; row < numberOfRows; row++) {
+      for (let col = 0; col < numberOfColumns; col++) {
+        const char = wordGrid[row][col];
+        if (trie.root.children[char]) {
+          directionalDfs(row, col, trie.root, "", null);
+        }
       }
     }
-  }
 
-  return foundWords;
+    return foundWords;
+  } catch (error) {
+    throw new Error("An unexpected error has occurred.");
+  }
 }
 
 module.exports.findWords = findWords;
