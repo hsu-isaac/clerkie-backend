@@ -98,15 +98,12 @@ const isValidCoord = (row, col, numberOfRows, numberOfColumns) => {
  * @param {Set} dictionary Contains all words to look for in the letter grid
  * @returns {Set} All words from the dictionary that were found
  * @throws {Error} If an error is encountered
+ * @throws {TypeError} If any input is invalid
  */
 function findWords(wordGrid, dictionary) {
   try {
     dictionary = validateInputs(wordGrid, dictionary);
-  } catch (error) {
-    throw new Error(`Invalid input: ${error.message}`);
-  }
 
-  try {
     if (wordGrid.length === 0 || dictionary.size === 0) {
       return new Set();
     }
@@ -177,7 +174,11 @@ function findWords(wordGrid, dictionary) {
 
     return foundWords;
   } catch (error) {
-    throw new Error("An unexpected error has occurred.");
+    if (error instanceof TypeError) {
+      throw new TypeError(`Invalid input: ${error.message}`);
+    } else {
+      throw new Error("An unexpected error has occurred.");
+    }
   }
 }
 

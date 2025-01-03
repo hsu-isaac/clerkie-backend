@@ -8,7 +8,7 @@ describe("findWords", () => {
       expect(() => {
         findWords(grid, dictionary);
       }).toThrow(
-        new Error("Invalid input: wordGrid must be an array of arrays.")
+        new TypeError("Invalid input: wordGrid must be an array of arrays.")
       );
     });
     test("wordGrid holding non strings", () => {
@@ -22,7 +22,7 @@ describe("findWords", () => {
       expect(() => {
         findWords(grid, dictionary);
       }).toThrow(
-        new Error(
+        new TypeError(
           "Invalid input: wordGrid must contain only single-character strings."
         )
       );
@@ -38,7 +38,7 @@ describe("findWords", () => {
       expect(() => {
         findWords(grid, dictionary);
       }).toThrow(
-        new Error(
+        new TypeError(
           "Invalid input: wordGrid must contain only single-character strings."
         )
       );
@@ -53,7 +53,7 @@ describe("findWords", () => {
       const dictionary = [];
       expect(() => {
         findWords(grid, dictionary);
-      }).toThrow(new Error("Invalid input: dictionary must be a Set."));
+      }).toThrow(new TypeError("Invalid input: dictionary must be a Set."));
     });
   });
   describe("Valid inputs", () => {
