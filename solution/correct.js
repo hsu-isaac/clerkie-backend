@@ -17,6 +17,9 @@ const mongoose = require("mongoose");
  * until one can be found.
  */
 async function pullFirstUser(userIds) {
+  if (!Array.isArray(userIds)) {
+    throw new TypeError("userIds must be an array of ObjectIds.");
+  }
   const users = await models.user.find({ _id: { $in: userIds } });
 
   const userMap = {};
@@ -45,6 +48,10 @@ module.exports.pullFirstUser = pullFirstUser;
  * The users argument is an array of user objects (with _id fields)
  */
 async function pullPaymentsForUsers(users) {
+  if (!Array.isArray(users)) {
+    throw new TypeError("userIds must be an array of user objects.");
+    // Should also validate that each of the user objects are valid
+  }
   let result = [];
 
   const payments = await models.payment.find({
@@ -91,6 +98,10 @@ module.exports.convertToStr = convertToStr;
  * Sometimes the payment id might not match any payments.
  */
 async function getPaymentWithUser(paymentId) {
+  if (!mongoose.Types.ObjectId.isValid(paymentId)) {
+    throw new TypeError(`${paymentId} is not a valid ObjectId`);
+  }
+
   let payment = await models.payment.findById(paymentId).populate("user");
 
   if (!payment) {
@@ -107,6 +118,10 @@ module.exports.getPaymentWithUser = getPaymentWithUser;
  * Note: userIds is passed in as an array of strings
  */
 async function getGroupedUserPmts(userIds) {
+  if (!Array.isArray(userIds)) {
+    throw new TypeError("userIds must be an array of ObjectIds.");
+  }
+
   const payments = await models.payment.find({
     user: { $in: userIds },
     active: true,

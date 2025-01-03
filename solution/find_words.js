@@ -14,6 +14,9 @@
  * overall structure/code decomposition, and error handling.
  */
 
+/**
+ * Represents a Trie Node in the Trie data structure.
+ */
 class TrieNode {
   constructor() {
     this.children = {};
@@ -21,11 +24,18 @@ class TrieNode {
   }
 }
 
+/**
+ * Represents a Trie data structure used for efficient word lookups.
+ */
 class Trie {
   constructor() {
     this.root = new TrieNode();
   }
 
+  /**
+   * Inserts a word into the Trie.
+   * @param {string} word The word to insert into the Trie.
+   */
   insert(word) {
     let node = this.root;
     for (const char of word) {
@@ -42,7 +52,7 @@ class Trie {
  * Helper function to validate the input values for wordGrid and dictionary
  * @param {Array} wordGrid Letter grid as an array of arrays of strings
  * @param {Set} dictionary Set containing words to search for
- * @returns {Set} The dictionary as a Set, ensuring all entries are valid
+ * @returns {Set} The dictionary, ensuring all entries are valid
  * @throws {TypeError} If any input is invalid
  */
 const validateInputs = (wordGrid, dictionary) => {
