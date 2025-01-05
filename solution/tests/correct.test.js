@@ -156,7 +156,9 @@ describe("Testing Functions", () => {
       const userIds = testData.users.map((user) => user._id.toString());
       const groupedPayments = await getGroupedUserPmts(userIds);
       expect(groupedPayments).toHaveProperty(testData.users[0]._id.toString());
+      expect(groupedPayments[testData.users[0]._id]).toHaveLength(1);
       expect(groupedPayments).toHaveProperty(testData.users[1]._id.toString());
+      expect(groupedPayments[testData.users[1]._id]).toHaveLength(1);
     });
 
     test("should return an empty array if no active payments are found", async () => {
