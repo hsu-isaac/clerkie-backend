@@ -123,20 +123,28 @@ async function getGroupedUserPmts(userIds) {
     throw new TypeError("userIds must be an array of ObjectIds.");
   }
 
-  const payments = await models.payment.find({
-    user: { $in: userIds },
-    active: true,
-  });
+  const userIdsAsObjectIds = userIds.map((id) => mongoose.Types.ObjectId(id));
 
-  const result = {};
+  const pipeline = [
+    {
+      $match: {
+        user: { $in: userIdsAsObjectIds },
+        active: true,
+      },
+    },
+    {
+      $group: {
+        _id: "$user",
+        payments: { $push: "$$ROOT" },
+      },
+    },
+  ];
 
-  for (const payment of payments) {
-    const userId = payment.user._id.toString();
-    if (!result[userId]) {
-      result[userId] = [];
-    }
-    result[userId].push;
-  }
+  const groupedPayments = await models.payment.aggregate(pipeline);
+
+  const result = Object.fromEntries(
+    groupedPayments.map(({ _id, payments }) => [_id.toString(), payments])
+  );
 
   for (const userId of userIds) {
     if (!result[userId]) {
