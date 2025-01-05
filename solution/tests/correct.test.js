@@ -67,13 +67,13 @@ describe("Testing Functions", () => {
       expect(user._id.toString()).toBe(testData.users[0]._id.toString());
     });
 
-    test("should return undefined if no user is found", async () => {
+    test("should return null if no user is found", async () => {
       const nonExistentIds = [
         "60d0fe4f5311236168a109c9",
         "60d0fe4f5311236168a109c8",
       ];
       const user = await pullFirstUser(nonExistentIds);
-      expect(user).toBeUndefined();
+      expect(user).toBeNull();
     });
 
     test("should return the first user from mixed valid and invalid ids", async () => {

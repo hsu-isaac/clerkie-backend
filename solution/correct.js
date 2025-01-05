@@ -32,7 +32,8 @@ async function pullFirstUser(userIds) {
       return userMap[userId];
     }
   }
-  return;
+
+  return null;
 }
 module.exports.pullFirstUser = pullFirstUser;
 
@@ -129,10 +130,18 @@ async function getGroupedUserPmts(userIds) {
 
   const result = {};
 
+  for (const payment of payments) {
+    const userId = payment.user._id.toString();
+    if (!result[userId]) {
+      result[userId] = [];
+    }
+    result[userId].push;
+  }
+
   for (const userId of userIds) {
-    result[userId] = payments.filter(
-      (payment) => payment.user.toString() === userId
-    );
+    if (!result[userId]) {
+      result[userId] = [];
+    }
   }
 
   return result;
